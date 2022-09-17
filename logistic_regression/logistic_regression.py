@@ -6,10 +6,12 @@ import pandas as pd
 
 class LogisticRegression:
     
-    def __init__(self):
+    def __init__(self, rate = 0.01, it = 2000):
         # NOTE: Feel free add any hyperparameters 
         # (with defaults) as you see fit
-        pass
+        self.rate = rate
+        self.it = it
+
         
     def fit(self, X, y):
         """
@@ -21,8 +23,14 @@ class LogisticRegression:
             y (array<m>): a vector of floats containing 
                 m binary 0.0/1.0 labels
         """
-        # TODO: Implement
-        raise NotImplemented()
+        # print(X[0])
+        dataX = X.to_numpy()
+        datay = y.to_numpy()
+        self.w = np.zeros(len(dataX[1]))
+        # print(X)
+        # print(dataX)
+        for i in range(self.it):
+            self.w += self.rate*(np.dot(datay-(sigmoid(np.dot(self.w,dataX.T))),dataX))
     
     def predict(self, X):
         """
@@ -38,8 +46,15 @@ class LogisticRegression:
             A length m array of floats in the range [0, 1]
             with probability-like predictions
         """
-        # TODO: Implement
-        raise NotImplemented()
+        if isinstance(X, pd.DataFrame):
+            dataX = X.to_numpy()
+        else:
+            dataX = X
+        ret = np.zeros(len(dataX[:,0]))
+        for i in range(len(ret)):
+            ret[i] = sigmoid(self.w.T@dataX[i].T)
+        
+        return ret
         
 
         
