@@ -1,14 +1,23 @@
 import numpy as np 
 import pandas as pd 
+import time
+import random as randy
 # IMPORTANT: DO NOT USE ANY OTHER 3RD PARTY PACKAGES
 # (math, random, collections, functools, etc. are perfectly fine)
 
 
 class KMeans:
     
-    def __init__(self):
+    def __init__(self, k=2, scale = np.array([1, 1])):
         # NOTE: Feel free add any hyperparameters 
         # (with defaults) as you see fit
+        self.k = k
+        self.scale = scale
+        self.center = np.zeros(((self.k),2))
+        # print(center)
+        # for i in range(k):
+        #     j = randy.randint(0, length())
+        #     center[k] = 
         pass
         
     def fit(self, X):
@@ -20,7 +29,54 @@ class KMeans:
                 m rows (#samples) and n columns (#features)
         """
         # TODO: Implement
-        raise NotImplementedError()
+        data = X.to_numpy()
+        data[:,0] *= self.scale[0]
+        data[:,1] *= self.scale[1]
+        addon = np.zeros((len(X['x1']),2))
+        data = np.hstack((data, addon))
+        for i in range(self.k):
+            j = randy.randint(0, len(X['x1'])-1)
+            self.center[i] = data[j][0:2]
+        data[:,3] += 1000
+
+        for i in range(len(X['x1'])):
+            for j in range(self.k):
+                dist = euclidean_distance(data[i,0:2], self.center[j])
+                if dist < data[i,3]:
+                    data[i,3] = dist
+                    data[i,2] = j
+
+        lastFC = np.zeros(((self.k),3))
+        run = True
+        times = 0
+        while run:
+            findCenter = np.zeros(((self.k),3))
+            for i in range(len(data[:])):
+                point = int(round(data[i,2]))
+                findCenter[point,0:2] += data[i,0:2]
+                findCenter[point,2] += 1
+            stop = True
+            for i in range(self.k):
+                if abs(findCenter[i,2] - lastFC[i,2]>10):
+                    stop = False
+            for i in range(self.k):
+                self.center[i] = findCenter[i,0:2]*(1/findCenter[i,2])
+            data[:,3] += 1000
+            for i in range(len(X['x1'])):
+                for j in range(self.k):
+                    dist = euclidean_distance(data[i,0:2], self.center[j])
+                    if dist < data[i,3]:
+                        data[i,3] = dist
+                        data[i,2] = j
+            times += 1
+            lastFC = findCenter
+            if times > 50:
+                run = False
+            if stop:
+                run = False
+
+        self.data = data
+        # raise NotImplementedError()
     
     def predict(self, X):
         """
@@ -39,7 +95,10 @@ class KMeans:
             could be: array([2, 0, 0, 1, 2, 1, 1, 0, 2, 2])
         """
         # TODO: Implement 
-        raise NotImplementedError()
+        ret = np.zeros(len(X['x1']), int)
+        for i in range(len(ret)):
+            ret[i] = int(round(self.data[i,2]))
+        return ret
     
     def get_centroids(self):
         """
@@ -57,7 +116,7 @@ class KMeans:
         ])
         """
         # TODO: Implement 
-        raise NotImplementedError()
+        return self.center
     
     
     
